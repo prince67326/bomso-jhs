@@ -89,14 +89,29 @@ function pushToFirebase(){
   }catch(e){ console.log('push err', e); }
 }
 function pullFromFirebase(){
- if(!firebaseReady) return;
- firebase.database().ref('bomso/main').on('value', function(ss){
-  var v=ss.val();
-  if(v && v.DATA && v.DATA.length){
-   unsnap(v);
-   try{rebuildClasses(); document.getElementById('cls').innerHTML=classes.map(c=>'<option>'+c+'</option>').join('');}catch(e){console.log(e);}
-  }
- });
+  if(!firebaseReady) return;
+  firebase.database().ref('bomso/main').on('value', function(ss){
+    var v=ss.val();
+    if(v && v.DATA && v.DATA.length){
+      // MERGE - don't wipe local store
+      if(v.DATA && v.DATA.length){ DATA=[]; v.DATA.forEach(d=>DATA.push(d)); }
+      if(v.store){
+        Object.keys(v.store).forEach(k=>{
+          store[k] = cp(v.store[k]);
+        });
+      }
+      if(v.attStore){
+        Object.keys(v.attStore).forEach(k=>{ attStore[k] = cp(v.attStore[k]); });
+      }
+      if(v.metaStore) metaStore=v.metaStore;
+      if(v.year){ metaStore.year=v.year; metaStore.academicYear=v.year; }
+      try{ rebuildClasses(); document.getElementById('cls').innerHTML=classes.map(c=>'<option>'+c+'</option>').join(''); }catch(e){}
+      try{ if(typeof buildTable==='function') buildTable(); }catch(e){}
+      let el=document.getElementById('cloudStatus');
+      if(el) el.textContent='Synced from cloud';
+    }
+  });
+}
 }
 function isOld(cls){return String(cls||'').indexOf('OLD STUDENTS')===0;}
 function activeClasses(){return [...new Set(DATA.filter(d=>!isOld(d[0])).map(d=>d[0]))];}
