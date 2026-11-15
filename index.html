@@ -83,7 +83,7 @@ try{firebase.database().ref('bomso/main').set(snap());let el=document.getElement
 }
 function pullFromFirebase(){
 if(!firebaseReady)return;
-firebase.database().ref('bomso/main').once('value').then(function(ss){
+firebase.database().ref('bomso/main').on('value',function(ss){
 let v=ss.val();
 if(v&&v.DATA&&v.DATA.length){
 let curLen=DATA.length;
