@@ -82,15 +82,14 @@ if(!firebaseReady)return;
 try{firebase.database().ref('bomso/main').set(snap());let el=document.getElementById('cloudStatus');if(el&&loggedIn)el.innerText='Saved to Firebase - '+new Date().toLocaleTimeString();}catch(e){console.log(e);}
 }
 function pullFromFirebase(){
-if(!firebaseReady)return;
-firebase.database().ref('bomso/main').on('value',function(ss){
-let v=ss.val();
-if(v&&v.DATA&&v.DATA.length){
-let curLen=DATA.length;
-let hasMarks=false;try{hasMarks=Object.keys(store||{}).some(k=> (store[k]||[]).some(r=>r.ind!==''||r.exm!==''));}catch(e){}
-if(!hasMarks){unsnap(v);rebuildClasses();document.getElementById('cls').innerHTML=classes.map(c=>'<option>'+c+'</option>').join('');buildAcademicYears();render();let el=document.getElementById('cloudStatus');if(el)el.innerText='Loaded from Firebase - '+v.when;}
-}
-}).catch(function(e){console.log(e);});
+ if(!firebaseReady) return;
+ firebase.database().ref('bomso/main').on('value', function(ss){
+  var v=ss.val();
+  if(v && v.DATA && v.DATA.length){
+   unsnap(v);
+   try{rebuildClasses(); document.getElementById('cls').innerHTML=classes.map(c=>'<option>'+c+'</option>').join('');}catch(e){console.log(e);}
+  }
+ });
 }
 function isOld(cls){return String(cls||'').indexOf('OLD STUDENTS')===0;}
 function activeClasses(){return [...new Set(DATA.filter(d=>!isOld(d[0])).map(d=>d[0]))];}
